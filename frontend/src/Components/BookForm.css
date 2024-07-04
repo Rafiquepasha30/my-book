@@ -1,0 +1,87 @@
+.book-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-form h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #333;
+}
+
+.book-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.book-form form div {
+    margin-bottom: 1rem;
+}
+
+.book-form form label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.book-form form input[type="text"],
+.book-form form input[type="number"],
+.book-form form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.book-form form input[type="text"]:focus,
+.book-form form input[type="number"]:focus,
+.book-form form select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.book-form form select {
+    appearance: none;
+    background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>') no-repeat right 0.75rem center;
+    background-size: 8px 10px;
+}
+
+.book-form form select option {
+    padding: 0.75rem;
+}
+
+.book-form form button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.book-form form button:hover {
+    background: #0056b3;
+}
+
+.book-form form input[type="text"],
+.book-form form input[type="number"],
+.book-form form select {
+    transition: border-color 0.3s;
+}
+
+.book-form form input[type="text"]:focus,
+.book-form form input[type="number"]:focus,
+.book-form form select:focus {
+    border-color: #007bff;
+    outline: none;
+}
