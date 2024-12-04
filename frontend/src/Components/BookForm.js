@@ -20,16 +20,16 @@ const BookForm = () => {
     const [genres, setGenres] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/book-types')
+        axios.get('https://my-book-4.onrender.com/book-types')
             .then(response => setBookTypes(response.data))
             .catch(error => console.error('Error fetching book types:', error));
 
-        axios.get('http://localhost:5000/genres')
+        axios.get('https://my-book-4.onrender.com/genres')
             .then(response => setGenres(response.data))
             .catch(error => console.error('Error fetching genres:', error));
 
         if (id) {
-            axios.get(`http://localhost:5000/books/${id}`)
+            axios.get(`https://my-book-4.onrender.com/books/${id}`)
                 .then(response => setBook(response.data))
                 .catch(error => console.error('Error fetching book details:', error));
         }
@@ -43,7 +43,7 @@ const BookForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const action = id ? axios.put : axios.post;
-        const url = id ? `http://localhost:5000/books/${id}` : 'http://localhost:5000/books';
+        const url = id ? `https://my-book-4.onrender.com/books/${id}` : 'https://my-book-4.onrender.com/books';
 
         action(url, book)
             .then(() => navigate('/'))
