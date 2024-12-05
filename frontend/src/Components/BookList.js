@@ -11,14 +11,14 @@ const BookList = () => {
     }, []);
 
     const fetchBooks = () => {
-        axios.get('https://my-book-4.onrender.com/books')
+        axios.get('https://my-book-6.onrender.com/books')
             .then(response => setBooks(response.data.filter(book => book.is_active)))
             .catch(error => console.error('Error fetching books:', error));
     };
 
     const deactivateBook = (id) => {
         console.log('Deactivating book with ID:', id);
-        axios.put(`https://my-book-4.onrender.com/books/${id}/deactivate`)
+        axios.put(`https://my-book-6.onrender.com/books/${id}/deactivate`)
             .then(response => {
                 console.log('Book deactivated:', response.data);
                 fetchBooks();
