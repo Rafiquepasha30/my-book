@@ -2,11 +2,7 @@ require('dotenv').config(); // Load environment variables
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const {
-    MongoClient,
-    ObjectId
-} = require('mongodb');
-
+const mongoose = require('mongoose');
 const app = express();
 const port = process.env.PORT || 5000; // Use environment variable for port
 
@@ -14,29 +10,70 @@ const port = process.env.PORT || 5000; // Use environment variable for port
 app.use(bodyParser.json());
 app.use(cors());
 
-// MongoDB connection using environment variables
-let db;
-const client = new MongoClient(process.env.MONGO_URI);
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    }).then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-(async () => {
-    try {
-        await client.connect();
-        db = client.db(process.env.DB_NAME);
-        console.log('Connected to MongoDB');
-    } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
-    }
-})();
+// Define Mongoose Schemas
+const BookTypeSchema = new mongoose.Schema({
+    type_name: {
+        type: String,
+        required: true
+    },
+});
 
-// Define a route for the root URL
+const GenreSchema = new mongoose.Schema({
+    genre_name: {
+        type: String,
+        required: true
+    },
+});
+
+const BookSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    author: {
+        type: String,
+        required: true
+    },
+    type_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'BookType'
+    },
+    genre_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Genre'
+    },
+    publication: String,
+    pages: Number,
+    price: Number,
+    cover_photo: String,
+    is_active: {
+        type: Boolean,
+        default: true
+    },
+});
+
+const BookType = mongoose.model('BookType', BookTypeSchema);
+const Genre = mongoose.model('Genre', GenreSchema);
+const Book = mongoose.model('Book', BookSchema);
+
+// Routes
+
+// Root route
 app.get('/', (req, res) => {
     res.send('Welcome to the Book Management API!');
 });
 
-// Route to get book types
+// Fetch all book types
 app.get('/book-types', async (req, res) => {
     try {
-        const bookTypes = await db.collection('booktypes').find().toArray();
+        const bookTypes = await BookType.find();
         res.json(bookTypes);
     } catch (err) {
         console.error('Error fetching book types:', err);
@@ -46,10 +83,10 @@ app.get('/book-types', async (req, res) => {
     }
 });
 
-// Route to get genres
+// Fetch all genres
 app.get('/genres', async (req, res) => {
     try {
-        const genres = await db.collection('genres').find().toArray();
+        const genres = await Genre.find();
         res.json(genres);
     } catch (err) {
         console.error('Error fetching genres:', err);
@@ -59,32 +96,12 @@ app.get('/genres', async (req, res) => {
     }
 });
 
-// Route to get all books
+// Fetch all books
 app.get('/books', async (req, res) => {
     try {
-        const books = await db.collection('books').aggregate([{
-                $lookup: {
-                    from: 'booktypes',
-                    localField: 'type_id',
-                    foreignField: '_id',
-                    as: 'type_info',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'genres',
-                    localField: 'genre_id',
-                    foreignField: '_id',
-                    as: 'genre_info',
-                },
-            },
-            {
-                $unwind: '$type_info'
-            },
-            {
-                $unwind: '$genre_info'
-            },
-        ]).toArray();
+        const books = await Book.find()
+            .populate('type_id', 'type_name')
+            .populate('genre_id', 'genre_name');
         res.json(books);
     } catch (err) {
         console.error('Error fetching books:', err);
@@ -94,37 +111,71 @@ app.get('/books', async (req, res) => {
     }
 });
 
-// Route to get a specific book by ID
+// Fetch a book by ID
 app.get('/books/:id', async (req, res) => {
     try {
-        const book = await db.collection('books').findOne({
-            _id: new ObjectId(req.params.id)
-        });
-        if (!book) {
-            return res.status(404).json({
+        const book = await Book.findById(req.params.id)
+            .populate('type_id', 'type_name')
+            .populate('genre_id', 'genre_name');
+        if (book) {
+            res.json(book);
+        } else {
+            res.status(404).json({
                 error: 'Book not found'
             });
         }
-        res.json(book);
     } catch (err) {
-        console.error('Error fetching book details:', err);
+        console.error('Error fetching book:', err);
         res.status(500).json({
-            error: 'Failed to fetch book details'
+            error: 'Failed to fetch book'
         });
     }
 });
 
-// Route to deactivate a book by ID
+// Add a new book
+app.post('/books', async (req, res) => {
+    try {
+        const newBook = new Book(req.body);
+        const savedBook = await newBook.save();
+        res.status(201).json(savedBook);
+    } catch (err) {
+        console.error('Error adding book:', err);
+        res.status(500).json({
+            error: 'Failed to add book'
+        });
+    }
+});
+
+// Update a book by ID
+app.put('/books/:id', async (req, res) => {
+    try {
+        const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+        if (updatedBook) {
+            res.json(updatedBook);
+        } else {
+            res.status(404).json({
+                error: 'Book not found'
+            });
+        }
+    } catch (err) {
+        console.error('Error updating book:', err);
+        res.status(500).json({
+            error: 'Failed to update book'
+        });
+    }
+});
+
+// Deactivate a book by ID
 app.put('/books/:id/deactivate', async (req, res) => {
     try {
-        const result = await db.collection('books').updateOne({
-            _id: new ObjectId(req.params.id)
+        const deactivatedBook = await Book.findByIdAndUpdate(req.params.id, {
+            is_active: false
         }, {
-            $set: {
-                is_active: false
-            }
+            new: true
         });
-        if (result.matchedCount > 0) {
+        if (deactivatedBook) {
             res.json({
                 message: 'Book deactivated successfully'
             });
@@ -141,82 +192,12 @@ app.put('/books/:id/deactivate', async (req, res) => {
     }
 });
 
-// Route to update a book by ID
-app.put('/books/:id', async (req, res) => {
-    const {
-        title,
-        author,
-        type_id,
-        genre_id,
-        publication,
-        pages,
-        price,
-        cover_photo,
-    } = req.body;
-
-    try {
-        const result = await db.collection('books').updateOne({
-            _id: new ObjectId(req.params.id)
-        }, {
-            $set: {
-                title,
-                author,
-                type_id: new ObjectId(type_id),
-                genre_id: new ObjectId(genre_id),
-                publication,
-                pages,
-                price,
-                cover_photo,
-            },
-        });
-
-        if (result.matchedCount > 0) {
-            res.json({
-                message: 'Book updated successfully'
-            });
-        } else {
-            res.status(404).json({
-                error: 'Book not found'
-            });
-        }
-    } catch (err) {
-        console.error('Error updating book:', err);
-        res.status(500).json({
-            error: 'Failed to update book'
-        });
-    }
-});
-
-// Route to add a new book
-app.post('/books', async (req, res) => {
-    const book = req.body;
-    try {
-        const result = await db.collection('books').insertOne(book);
-        res.status(201).json({
-            id: result.insertedId,
-            ...book
-        });
-    } catch (err) {
-        console.error('Error adding book:', err);
-        res.status(500).json({
-            error: 'Failed to add book'
-        });
-    }
-});
-
-// Route to add a new book type
+// Add a new book type
 app.post('/book-types', async (req, res) => {
-    const {
-        type_name
-    } = req.body;
     try {
-        const result = await db.collection('booktypes').insertOne({
-            type_name
-        });
-        res.status(201).json({
-            id: result.insertedId,
-            type_name
-        });
+        const newBookType = new BookType(req.body);
+        const savedBookType = await newBookType.save();
+        res.status(201).json(savedBookType);
     } catch (err) {
         console.error('Error adding book type:', err);
         res.status(500).json({
@@ -225,19 +206,12 @@ app.post('/book-types', async (req, res) => {
     }
 });
 
-// Route to add a new genre
+// Add a new genre
 app.post('/genres', async (req, res) => {
-    const {
-        genre_name
-    } = req.body;
     try {
-        const result = await db.collection('genres').insertOne({
-            genre_name
-        });
-        res.status(201).json({
-            id: result.insertedId,
-            genre_name
-        });
+        const newGenre = new Genre(req.body);
+        const savedGenre = await newGenre.save();
+        res.status(201).json(savedGenre);
     } catch (err) {
         console.error('Error adding genre:', err);
         res.status(500).json({

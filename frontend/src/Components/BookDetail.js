@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './BookDetail.css';
-import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 const BookDetail = () => {
     const { id } = useParams();
@@ -21,14 +20,14 @@ const BookDetail = () => {
             <h1>{book.title}</h1>
             <img src={book.cover_photo} alt={book.title} width="200" />
             <p><strong>Author:</strong> {book.author}</p>
-            <p><strong>Type:</strong> {book.type_name}</p>
-            <p><strong>Genre:</strong> {book.genre_name}</p>
-            <p><strong>Publication:</strong> {book.publication}</p>
-            <p><strong>Pages:</strong> {book.pages}</p>
-            <p><strong>Price:</strong> ${book.price}</p>
-            <button className='edit-button'> 
-                <Link to={`/books/edit/${book.id}`} className="edit-link">Edit Details</Link> 
-                </button>
+            <p><strong>Type:</strong> {book.type_info?.type_name || 'N/A'}</p>
+            <p><strong>Genre:</strong> {book.genre_info?.genre_name || 'N/A'}</p>
+            <p><strong>Publication:</strong> {book.publication || 'N/A'}</p>
+            <p><strong>Pages:</strong> {book.pages || 'N/A'}</p>
+            <p><strong>Price:</strong> ${book.price || 'N/A'}</p>
+            <Link to={`/books/edit/${book._id}`} className="edit-link">
+                <button className="edit-button">Edit Details</button>
+            </Link>
         </div>
     );
 };

@@ -7,21 +7,24 @@ const BookList = () => {
     const [books, setBooks] = useState([]);
 
     useEffect(() => {
-        fetchBooks(); 
+        fetchBooks();
     }, []);
 
     const fetchBooks = () => {
         axios.get('https://my-book-6.onrender.com/books')
-            .then(response => setBooks(response.data.filter(book => book.is_active)))
+            .then(response => {
+                const activeBooks = response.data.filter(book => book.is_active !== false); // Handle missing is_active
+                setBooks(activeBooks);
+            })
             .catch(error => console.error('Error fetching books:', error));
     };
 
     const deactivateBook = (id) => {
         console.log('Deactivating book with ID:', id);
         axios.put(`https://my-book-6.onrender.com/books/${id}/deactivate`)
-            .then(response => {
-                console.log('Book deactivated:', response.data);
-                fetchBooks();
+            .then(() => {
+                console.log('Book deactivated successfully');
+                fetchBooks(); // Refresh the book list after deactivating
             })
             .catch(error => console.error('Error deactivating book:', error));
     };
@@ -45,22 +48,21 @@ const BookList = () => {
                 </thead>
                 <tbody>
                     {books.map(book => (
-                        <tr key={book.id}>
+                        <tr key={book._id}>
                             <td>{book.title}</td>
                             <td>{book.author}</td>
-                            <td>{book.type_name}</td>
-                            <td>{book.genre_name}</td>
-                            <td>{book.publication}</td>
-                            <td>{book.pages}</td>
-                            <td>{book.price}</td>
+                            <td>{book.type_info?.type_name || 'N/A'}</td>
+                            <td>{book.genre_info?.genre_name || 'N/A'}</td>
+                            <td>{book.publication || 'N/A'}</td>
+                            <td>{book.pages || 'N/A'}</td>
+                            <td>{book.price || 'N/A'}</td>
                             <td>
-                                <Link to={`/books/${book.id}`}>
+                                <Link to={`/books/${book._id}`}>
                                     <img src={book.cover_photo} alt={book.title} width="50" />
                                 </Link>
                             </td>
                             <td>
-                                <button onClick={() => deactivateBook(book.id)}>Deactivate</button>
-                               
+                                <button onClick={() => deactivateBook(book._id)}>Deactivate</button>
                             </td>
                         </tr>
                     ))}
