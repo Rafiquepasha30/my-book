@@ -11,9 +11,9 @@ const BookList = () => {
     }, []);
 
     const fetchBooks = () => {
-        axios.get('https://my-book-6.onrender.com/books')
+        axios.get('https://my-book-8.onrender.com/books')
             .then(response => {
-                const activeBooks = response.data.filter(book => book.is_active !== false); // Handle missing is_active
+                const activeBooks = response.data.filter(book => book.is_active !== false); // Filter active books
                 setBooks(activeBooks);
             })
             .catch(error => console.error('Error fetching books:', error));
@@ -21,7 +21,7 @@ const BookList = () => {
 
     const deactivateBook = (id) => {
         console.log('Deactivating book with ID:', id);
-        axios.put(`https://my-book-6.onrender.com/books/${id}/deactivate`)
+        axios.put(`https://my-book-8.onrender.com/books/${id}/deactivate`)
             .then(() => {
                 console.log('Book deactivated successfully');
                 fetchBooks(); // Refresh the book list after deactivating
@@ -51,8 +51,8 @@ const BookList = () => {
                         <tr key={book._id}>
                             <td>{book.title}</td>
                             <td>{book.author}</td>
-                            <td>{book.type_info?.type_name || 'N/A'}</td>
-                            <td>{book.genre_info?.genre_name || 'N/A'}</td>
+                            <td>{book.type_id?.type_name || 'N/A'}</td>
+                            <td>{book.genre_id?.genre_name || 'N/A'}</td>
                             <td>{book.publication || 'N/A'}</td>
                             <td>{book.pages || 'N/A'}</td>
                             <td>{book.price || 'N/A'}</td>

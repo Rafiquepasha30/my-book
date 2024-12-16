@@ -8,13 +8,16 @@ const port = process.env.PORT || 5000; // Use environment variable for port
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://my-book-8.onrender.com/books' 
+}));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-    }).then(() => console.log('Connected to MongoDB'))
+    })
+    .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
 // Define Mongoose Schemas
@@ -35,27 +38,43 @@ const GenreSchema = new mongoose.Schema({
 const BookSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
     },
     author: {
         type: String,
-        required: true
+        required: true,
     },
     type_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'BookType'
+        ref: 'BookType',
+        required: true,
     },
     genre_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Genre'
+        ref: 'Genre',
+        required: true,
     },
-    publication: String,
-    pages: Number,
-    price: Number,
-    cover_photo: String,
+    publication: {
+        type: String,
+        default: '',
+    },
+    pages: {
+        type: Number,
+        required: true,
+        min: [1, 'Pages must be a positive number.'],
+    },
+    price: {
+        type: Number,
+        required: true,
+        min: [1, 'Price must be a positive number.'],
+    },
+    cover_photo: {
+        type: String,
+        required: true,
+    },
     is_active: {
         type: Boolean,
-        default: true
+        default: true,
     },
 });
 
@@ -135,13 +154,32 @@ app.get('/books/:id', async (req, res) => {
 // Add a new book
 app.post('/books', async (req, res) => {
     try {
+        const {
+            title,
+            author,
+            type_id,
+            genre_id,
+            pages,
+            price,
+            cover_photo
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !author || !type_id || !genre_id || !pages || !price || !cover_photo) {
+            return res.status(400).json({
+                error: 'All fields except publication are required.'
+            });
+        }
+
+        // Create and save the book
         const newBook = new Book(req.body);
         const savedBook = await newBook.save();
         res.status(201).json(savedBook);
     } catch (err) {
-        console.error('Error adding book:', err);
+        console.error('Error adding book:', err.message);
         res.status(500).json({
-            error: 'Failed to add book'
+            error: 'Failed to add book',
+            details: err.message
         });
     }
 });
@@ -149,6 +187,24 @@ app.post('/books', async (req, res) => {
 // Update a book by ID
 app.put('/books/:id', async (req, res) => {
     try {
+        const {
+            title,
+            author,
+            type_id,
+            genre_id,
+            pages,
+            price,
+            cover_photo
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !author || !type_id || !genre_id || !pages || !price || !cover_photo) {
+            return res.status(400).json({
+                error: 'All fields except publication are required.'
+            });
+        }
+
+        // Update the book
         const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
             new: true
         });
@@ -160,9 +216,10 @@ app.put('/books/:id', async (req, res) => {
             });
         }
     } catch (err) {
-        console.error('Error updating book:', err);
+        console.error('Error updating book:', err.message);
         res.status(500).json({
-            error: 'Failed to update book'
+            error: 'Failed to update book',
+            details: err.message
         });
     }
 });
@@ -185,9 +242,10 @@ app.put('/books/:id/deactivate', async (req, res) => {
             });
         }
     } catch (err) {
-        console.error('Error deactivating book:', err);
+        console.error('Error deactivating book:', err.message);
         res.status(500).json({
-            error: 'Failed to deactivate book'
+            error: 'Failed to deactivate book',
+            details: err.message
         });
     }
 });
@@ -195,13 +253,27 @@ app.put('/books/:id/deactivate', async (req, res) => {
 // Add a new book type
 app.post('/book-types', async (req, res) => {
     try {
-        const newBookType = new BookType(req.body);
+        const {
+            type_name
+        } = req.body;
+
+        // Validate required field
+        if (!type_name) {
+            return res.status(400).json({
+                error: 'Type name is required.'
+            });
+        }
+
+        const newBookType = new BookType({
+            type_name
+        });
         const savedBookType = await newBookType.save();
         res.status(201).json(savedBookType);
     } catch (err) {
-        console.error('Error adding book type:', err);
+        console.error('Error adding book type:', err.message);
         res.status(500).json({
-            error: 'Failed to add book type'
+            error: 'Failed to add book type',
+            details: err.message
         });
     }
 });
@@ -209,17 +281,31 @@ app.post('/book-types', async (req, res) => {
 // Add a new genre
 app.post('/genres', async (req, res) => {
     try {
-        const newGenre = new Genre(req.body);
+        const {
+            genre_name
+        } = req.body;
+
+        // Validate required field
+        if (!genre_name) {
+            return res.status(400).json({
+                error: 'Genre name is required.'
+            });
+        }
+
+        const newGenre = new Genre({
+            genre_name
+        });
         const savedGenre = await newGenre.save();
         res.status(201).json(savedGenre);
     } catch (err) {
-        console.error('Error adding genre:', err);
+        console.error('Error adding genre:', err.message);
         res.status(500).json({
-            error: 'Failed to add genre'
+            error: 'Failed to add genre',
+            details: err.message
         });
     }
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at https://my-book-8.onrender.com:${port}`);
 });
