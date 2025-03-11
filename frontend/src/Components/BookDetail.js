@@ -9,7 +9,7 @@ const BookDetail = () => {
 
     useEffect(() => {
         // Fetch book details by ID
-        axios.get(`https://my-book-8.onrender.com/books/${id}`)
+        axios.get(`http://localhost:5000/books/${id}`)
             .then(response => setBook(response.data))
             .catch(error => console.error('Error fetching book details:', error));
     }, [id]);
@@ -21,8 +21,6 @@ const BookDetail = () => {
             <h1>{book.title}</h1>
             <img src={book.cover_photo} alt={book.title} width="200" />
             <p><strong>Author:</strong> {book.author}</p>
-            <p><strong>Type:</strong> {book.type_id?.type_name || 'N/A'}</p>
-            <p><strong>Genre:</strong> {book.genre_id?.genre_name || 'N/A'}</p>
             <p><strong>Publication:</strong> {book.publication || 'N/A'}</p>
             <p><strong>Pages:</strong> {book.pages || 'N/A'}</p>
             <p><strong>Price:</strong> ${book.price || 'N/A'}</p>
