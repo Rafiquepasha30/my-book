@@ -9,7 +9,7 @@ const BookDetail = () => {
 
     useEffect(() => {
         // Fetch book details by ID
-        axios.get(`https://my-book-14.onrender.com/${id}`)
+        axios.get(`https://my-book-15.onrender.com/${id}`)
             .then(response => setBook(response.data))
             .catch(error => console.error('Error fetching book details:', error));
     }, [id]);

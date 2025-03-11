@@ -11,7 +11,7 @@ const BookList = () => {
     }, []);
 
     const fetchBooks = () => {
-        axios.get('https://my-book-14.onrender.com')
+        axios.get('https://my-book-15.onrender.com')
             .then(response => {
                 const activeBooks = response.data;
                 console.log('Active books:', activeBooks); // Log active books for debugging
@@ -25,7 +25,7 @@ const BookList = () => {
 
     const deactivateBook = (id) => {
         console.log('Deactivating book with ID:', id);
-        axios.put(`https://my-book-14.onrender.com/${id}/deactivate`)
+        axios.put(`https://my-book-15.onrender.com/${id}/deactivate`)
             .then((response) => {
                 console.log('Book deactivated successfully:', response.data);
                 fetchBooks(); // Refresh the book list after deactivating
