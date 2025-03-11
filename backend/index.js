@@ -9,7 +9,9 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({
+    origin: 'https://my-book-adt4.vercel.app'
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
