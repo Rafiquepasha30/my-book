@@ -25,7 +25,7 @@ const BookForm = () => {
 
     const fetchBookDetails = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/books/${id}`);
+            const response = await axios.get(`https://my-book-14.onrender.com/${id}`);
             setBook(response.data);
         } catch (err) {
             setError('Failed to load book details. Please try again.');
@@ -56,7 +56,7 @@ const BookForm = () => {
 
         setLoading(true);
         const action = id ? axios.put : axios.post;
-        const url = id ? `http://localhost:5000/books/${id}` : 'http://localhost:5000/books';
+        const url = id ? `https://my-book-14.onrender.com/${id}` : 'https://my-book-14.onrender.com';
 
         try {
             await action(url, book);
