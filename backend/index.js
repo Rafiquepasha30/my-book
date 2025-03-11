@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-    origin: 'https://my-book-adt4.vercel.app'
+    origin: 'https://my-book-spes.vercel.app/'
 }));
 
 // MongoDB Connection
